@@ -4,16 +4,39 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"reflect"
 )
 
 // Blend two images to One
 // src image to blend
 // dst background image
-func Blend(src *image.RGBA, dst *image.RGBA) *image.RGBA {
-	output := []color.Color{}
-	rowLen := dst.Stride
-	for i := 0; i < len(dst.Pix); i += 4 {
-		output[i] = blendFormula(color.RGBA{R: src.Pix[i], G: src.Pix[i+1], B: src.Pix[i+2], A: src.Pix[i+3]}, color.RGBA{R: dst.Pix[i], G: dst.Pix[i+1], B: dst.Pix[i+2], A: dst.Pix[i+3]})
+func Blend(src image.Image, dst image.Image) *image.RGBA {
+
+	var rowLen int
+	var srcPix []uint8
+	var dstPix []uint8
+
+	if reflect.TypeOf(src).Elem().Name() == reflect.TypeOf(image.RGBA{}).Name() {
+		r := src.(*image.RGBA)
+		srcPix = r.Pix
+	} else if reflect.TypeOf(src).Elem().Name() == reflect.TypeOf(image.NRGBA{}).Name() {
+		r := src.(*image.NRGBA)
+		srcPix = r.Pix
+	}
+	if reflect.TypeOf(dst).Elem().Name() == reflect.TypeOf(image.RGBA{}).Name() {
+		d := dst.(*image.RGBA)
+		rowLen = d.Stride
+		dstPix = d.Pix
+	} else if reflect.TypeOf(dst).Elem().Name() == reflect.TypeOf(image.NRGBA{}).Name() {
+		d := dst.(*image.NRGBA)
+		rowLen = d.Stride
+		dstPix = d.Pix
+	}
+	output := make([]color.Color, len(dstPix))
+	// blending two images togather
+	for i := 0; i < len(dstPix)-1; i += 4 {
+		blended := blendFormula(color.RGBA{R: srcPix[i], G: srcPix[i+1], B: srcPix[i+2], A: srcPix[i+3]}, color.RGBA{R: dstPix[i], G: dstPix[i+1], B: dstPix[i+2], A: dstPix[i+3]})
+		output = append(output, blended)
 	}
 	newPix := []uint8{}
 	for _, x := range output {
