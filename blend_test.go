@@ -9,12 +9,12 @@ import (
 )
 
 func TestAlphaBlendImagesOfSameSize(t *testing.T) {
-	f, err := os.Open(`./background.png`)
+	back, err := os.Open(`./background.png`)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer f.Close()
+	defer back.Close()
 	star, err := os.Open(`./star.png`)
 	if err != nil {
 		t.Error(err)
@@ -22,7 +22,7 @@ func TestAlphaBlendImagesOfSameSize(t *testing.T) {
 	}
 	defer star.Close()
 
-	backImage, err := png.Decode(f)
+	backImage, err := png.Decode(back)
 	if err != nil {
 		t.Error(err)
 		return
